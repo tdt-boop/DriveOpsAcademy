@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Drive Ops Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{ --bg-dark:#1E1912; --paper:#F3ECD8; --paper-shade:#E6DCC0; --ink:#2B2620; --teal:#2F6E68; --teal-deep:#1F4A46; --stamp-red:#A63A3A; --brass:#C79A4B; --cloud:#FFFDF7; }
+  *{box-sizing:border-box;}
+  body{ margin:0; font-family:'IBM Plex Sans',sans-serif;
+    background:radial-gradient(circle at 12% 15%, rgba(47,110,104,0.16), transparent 42%), radial-gradient(circle at 88% 80%, rgba(166,58,58,0.10), transparent 42%), var(--bg-dark);
+    color:var(--paper); min-height:100vh; padding:24px 16px 60px;
+    padding-top:calc(24px + env(safe-area-inset-top,0px)); padding-bottom:calc(60px + env(safe-area-inset-bottom,0px)); }
+  .app{max-width:740px;margin:0 auto;}
+  .hq-header{ text-align:center; margin-bottom:18px; }
+  .hq-eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--brass); margin-bottom:6px; }
+  .hq-title{ font-family:'Special Elite',monospace; font-size:clamp(22px,4.4vw,30px); margin:0 0 4px; }
+  .hq-subtitle{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--teal); text-transform:uppercase; letter-spacing:1.5px; margin-bottom:16px; }
+  .stamp-bar{ display:flex; justify-content:center; gap:8px; flex-wrap:wrap; background:rgba(243,236,216,0.05); border:1px solid rgba(243,236,216,0.14); border-radius:10px; padding:12px 14px; }
+  .stamp-slot{ width:44px;height:44px;border-radius:50%; display:flex;align-items:center;justify-content:center; font-size:18px; background:rgba(243,236,216,0.04); border:2px dashed rgba(243,236,216,0.28); filter:grayscale(1); opacity:0.45; transition:all 0.35s ease; }
+  .stamp-slot.earned{ filter:grayscale(0); opacity:1; background:radial-gradient(circle at 30% 30%, #fdf7e6, var(--brass) 75%); border:2px solid var(--brass); box-shadow:0 0 16px rgba(199,154,75,0.5); transform:rotate(-6deg); }
+  .stamp-slot.pop{ animation:pop 0.6s ease; }
+  @keyframes pop{ 0%{transform:scale(0.6) rotate(-14deg);} 55%{transform:scale(1.2) rotate(-4deg);} 100%{transform:scale(1) rotate(-6deg);} }
+  .stamp-caption{ text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px; color:rgba(243,236,216,0.55); margin-top:8px; letter-spacing:1px; }
+  .file-strip{ display:flex; align-items:center; gap:12px; margin:20px 0 10px; padding:10px 14px; border-left:3px solid var(--stamp-red); background:rgba(166,58,58,0.08); font-family:'IBM Plex Mono',monospace; font-size:12.5px; }
+  .file-strip b{ color:var(--stamp-red); }
+  .mission{ display:none; background:var(--paper); color:var(--ink); border-radius:6px; padding:24px 24px 20px; margin-top:14px; box-shadow:0 18px 40px rgba(0,0,0,0.4); border:1px solid var(--paper-shade); }
+  .mission.active{ display:block; animation:rise 0.4s ease; }
+  @keyframes rise{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:translateY(0);} }
+  .mission-eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--teal-deep); font-weight:700; margin-bottom:4px; }
+  .mission h2{ font-family:'Special Elite',monospace; font-size:21px; margin:0 0 10px; }
+  .mission p{ font-size:14.5px; line-height:1.6; margin:0 0 12px; }
+  .tip-list{ margin:0 0 14px; padding-left:0; list-style:none; }
+  .tip-list li{ font-size:13.5px; background:var(--paper-shade); border-left:4px solid var(--teal); padding:8px 12px; border-radius:4px; margin-bottom:8px; font-weight:600; }
+  .tip-list code{ background:rgba(43,38,32,0.08); padding:1px 5px; border-radius:3px; font-family:'IBM Plex Mono',monospace; }
+  .name-input{ width:100%; font-family:'IBM Plex Sans',sans-serif; font-size:16px; font-weight:600; padding:12px 14px; border-radius:4px; border:2px solid #cabf9a; outline:none; margin-bottom:10px; background:var(--cloud); }
+  .name-input:focus{ border-color:var(--teal); }
+  .scenario-card{ background:var(--paper-shade); border-radius:6px; padding:14px; margin-bottom:12px; }
+  .scenario-text{ font-weight:600; font-size:13.5px; margin-bottom:10px; }
+  .btn-row{ display:flex; gap:8px; flex-wrap:wrap; }
+  .choice-btn{ font-family:'IBM Plex Sans',sans-serif; font-weight:700; font-size:13px; padding:9px 16px; border-radius:4px; border:2px solid var(--ink); background:var(--cloud); color:var(--ink); cursor:pointer; transition:transform 0.15s ease; }
+  .choice-btn:hover{ transform:translateY(-1px); }
+  .choice-btn.correct{ background:var(--teal); border-color:var(--teal-deep); color:white; }
+  .choice-btn.wrong{ background:var(--stamp-red); border-color:#7a2828; color:white; }
+  .feedback{ margin-top:10px; font-size:12.5px; font-weight:600; padding:8px 10px; border-radius:4px; display:none; }
+  .feedback.show{ display:block; }
+  .feedback.good{ background:#dcece6; color:#1f4a46; }
+  .feedback.bad{ background:#f2dede; color:#7a2828; }
+  .sort-item{ display:inline-block; background:var(--cloud); border:2px solid var(--ink); border-radius:4px; padding:8px 14px; font-weight:700; font-size:12.5px; margin:4px; cursor:pointer; transition:all 0.2s ease; }
+  .sort-item.done-a{ background:var(--teal); color:white; opacity:0.6; cursor:default; }
+  .sort-item.done-c{ background:var(--stamp-red); color:white; opacity:0.6; cursor:default; }
+  .sort-item.shake{ animation:shake 0.4s ease; }
+  @keyframes shake{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-5px);} 75%{transform:translateX(5px);} }
+  .buckets{ display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+  .bucket{ flex:1; min-width:130px; border-radius:6px; padding:10px; text-align:center; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700; min-height:36px; }
+  .bucket-a{ background:#dcece6; border:2px dashed var(--teal); }
+  .bucket-c{ background:#f2dede; border:2px dashed var(--stamp-red); }
+  .reveal-box{ display:none; margin-top:10px; font-size:13px; font-weight:600; background:#dcece6; color:#1f4a46; padding:10px 12px; border-radius:4px; }
+  .reveal-box.show{ display:block; }
+  .recap-grid{ display:grid; gap:8px; margin-bottom:16px; }
+  .recap-item{ display:flex; gap:10px; align-items:flex-start; background:var(--paper-shade); border-radius:6px; padding:9px 12px; }
+  .recap-emoji{ font-size:18px; }
+  .recap-text{ font-size:12.5px; font-weight:600; }
+  .cert{ text-align:center; border:3px double var(--brass); border-radius:8px; padding:26px 16px; background:linear-gradient(180deg,#fbf6e6,var(--cloud)); position:relative; }
+  .cert-eyebrow{ font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:2px; color:var(--teal-deep); font-weight:700;}
+  .cert-name{ font-family:'Special Elite',monospace; font-size:22px; margin:8px 0 2px;}
+  .cert-line{ font-size:13px; font-weight:600; color:#5a5340; margin-bottom:12px;}
+  .cert-badges{ font-size:22px; letter-spacing:4px; margin-bottom:10px;}
+  .cert-date{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:#8a8264; }
+  .cert-seal{ position:absolute; top:14px; right:16px; width:60px;height:60px;border-radius:50%; border:2px solid var(--stamp-red); color:var(--stamp-red); display:flex;align-items:center;justify-content:center; font-family:'IBM Plex Mono',monospace; font-size:8.5px; font-weight:700; text-align:center; transform:rotate(12deg); opacity:0.75; line-height:1.2; }
+  .nav-row{ display:flex; justify-content:space-between; align-items:center; margin-top:18px; }
+  .nav-btn{ font-family:'IBM Plex Mono',monospace; font-weight:700; font-size:13px; padding:11px 18px; border-radius:4px; border:none; cursor:pointer; transition:transform 0.15s ease; }
+  .nav-btn:hover{ transform:translateY(-2px); }
+  .nav-btn.primary{ background:var(--teal); color:white; }
+  .nav-btn.ghost{ background:transparent; color:var(--paper); border:2px solid rgba(243,236,216,0.3); }
+  .nav-btn:disabled{ opacity:0.35; cursor:not-allowed; transform:none; }
+  .hint{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:rgba(243,236,216,0.5); text-align:center; margin-top:8px; }
+  .parent-note{ margin-top:26px; font-size:12px; color:rgba(243,236,216,0.4); text-align:center; line-height:1.6; }
+  @media print{ body *{ visibility:hidden; } .cert, .cert *{ visibility:visible; } .cert{ position:absolute; top:0; left:0; width:100%; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hq-header">
+    <div class="hq-eyebrow">Field Manual · Personal Use</div>
+    <div class="hq-title">🗂️ Drive Ops Academy</div>
+    <div class="hq-subtitle">Google Drive Skills Training · 7 modules · ~75 min</div>
+    <div class="stamp-bar" id="stampBar">
+      <div class="stamp-slot" data-badge="0">🗂️</div>
+      <div class="stamp-slot" data-badge="1">📤</div>
+      <div class="stamp-slot" data-badge="2">🔍</div>
+      <div class="stamp-slot" data-badge="3">🔗</div>
+      <div class="stamp-slot" data-badge="4">💾</div>
+      <div class="stamp-slot" data-badge="5">⌨️</div>
+      <div class="stamp-slot" data-badge="6">🛡️</div>
+    </div>
+    <div class="stamp-caption" id="stampCaption">0 / 7 clearances earned</div>
+  </div>
+
+  <div class="file-strip" id="fileStrip"><span><b>FILE 01/07</b> — Read the briefing, then complete the field exercise to advance.</span></div>
+
+  <div class="mission active" id="mission0">
+    <div class="mission-eyebrow">Briefing · ~5 min</div>
+    <h2>Orientation</h2>
+    <p>Google Drive is where your files live online instead of just on one computer — always backed up, reachable from your phone or any browser, and easy to hand to another person without emailing giant attachments.</p>
+    <p>This longer session covers <strong>7 modules</strong>: finding your way around, uploading and organizing, searching like a pro, sharing without oversharing, managing your storage, keyboard speed tricks, and safety habits.</p>
+    <p>Enter your name for your clearance certificate:</p>
+    <input class="name-input" id="agentName" placeholder="Full name..." maxlength="30">
+    <div class="hint">Select "Begin Module 1" when ready.</div>
+  </div>
+
+  <div class="mission" id="mission1">
+    <div class="mission-eyebrow">Module 1 · ~10 min</div>
+    <h2>🗂️ Finding Your Way Around</h2>
+    <ul class="tip-list">
+      <li>📁 <strong>My Drive</strong> — everything you personally own or uploaded.</li>
+      <li>🤝 <strong>Shared with me</strong> — files others gave you access to. These don't count against your storage.</li>
+      <li>🕐 <strong>Recent</strong> — your last-opened files, the fastest way back to something.</li>
+      <li>⭐ <strong>Starred</strong> — files you've flagged for quick access.</li>
+      <li>🗑️ <strong>Trash</strong> — deleted items sit here 30 days before they're gone for good — and still count against your storage until then.</li>
+    </ul>
+    <p>Sort each item into where you'd actually find it:</p>
+    <div id="m1items"></div>
+    <div class="buckets"><div class="bucket bucket-a">MY DRIVE</div><div class="bucket bucket-c">SHARED WITH ME</div></div>
+    <div class="feedback" id="m1feedback"></div>
+  </div>
+
+  <div class="mission" id="mission2">
+    <div class="mission-eyebrow">Module 2 · ~10 min</div>
+    <h2>📤 Uploading & Organizing</h2>
+    <ul class="tip-list">
+      <li>⬆️ Drag files straight from your desktop into any Drive folder, or click "+ New."</li>
+      <li>📱 On your phone, the Drive app can scan a paper document with your camera and save it as a clean PDF.</li>
+      <li>🎨 Right-click any folder → Organize → Change color, so folders are easy to tell apart at a glance.</li>
+      <li>🗂️ <code>Shift + Z</code> adds a file to a second folder without making a duplicate copy.</li>
+      <li>⭐ Star anything you reopen often so it's always one click away.</li>
+    </ul>
+    <p>Tap each case to reveal the best move:</p>
+    <div id="m2scenarios"></div>
+  </div>
+
+  <div class="mission" id="mission3">
+    <div class="mission-eyebrow">Module 3 · ~10 min</div>
+    <h2>🔍 Search Like a Pro</h2>
+    <p>Google Drive's search bar understands special commands, not just plain words:</p>
+    <ul class="tip-list">
+      <li><code>type:pdf</code> / <code>type:spreadsheet</code> / <code>type:presentation</code> — jumps straight to that kind of file.</li>
+      <li><code>owner:me</code> — shows only files you personally own, hiding everything just shared with you.</li>
+      <li><code>to:name@email.com</code> — shows every file you've shared with that specific person.</li>
+      <li><code>before:2026-01-01</code> or <code>after:2025-06-01</code> — filters by when a file was last modified.</li>
+      <li>Put a phrase in <code>"quotation marks"</code> for an exact match instead of loose keywords.</li>
+    </ul>
+    <p>Tap each case to reveal the right search:</p>
+    <div id="m3scenarios"></div>
+  </div>
+
+  <div class="mission" id="mission4">
+    <div class="mission-eyebrow">Module 4 · ~10 min</div>
+    <h2>🔗 Sharing Without Oversharing</h2>
+    <ul class="tip-list">
+      <li>👥 Click <strong>Share</strong> to add specific people by email, and pick their role: Viewer, Commenter, or Editor.</li>
+      <li>🌐 "General access" can be Restricted (only people you named) or Anyone with the link — use the second one carefully.</li>
+      <li>♻️ Reopen Share any time to see or remove who has access, even after you've sent it.</li>
+    </ul>
+    <p>True or false?</p>
+    <div id="m4scenarios"></div>
+  </div>
+
+  <div class="mission" id="mission5">
+    <div class="mission-eyebrow">Module 5 · ~10 min</div>
+    <h2>💾 Storage & Housekeeping</h2>
+    <ul class="tip-list">
+      <li>📊 Every Google account starts with 15 GB, shared across Drive, Gmail, and Google Photos combined.</li>
+      <li>🔎 See exactly what's eating your space at Settings → Storage — sorted largest file first.</li>
+      <li>🗑️ Deleting a file only moves it to Trash — it still counts against your quota until you empty the Trash too.</li>
+      <li>💳 Google One is the paid upgrade (100 GB, 200 GB, 2 TB) if you truly outgrow 15 GB — check real usage before buying.</li>
+    </ul>
+    <p>Tap each case to reveal the fix:</p>
+    <div id="m5scenarios"></div>
+  </div>
+
+  <div class="mission" id="mission6">
+    <div class="mission-eyebrow">Module 6 · ~10 min</div>
+    <h2>⌨️ Speed Tricks & Shortcuts</h2>
+    <ul class="tip-list">
+      <li><code>Ctrl + /</code> (⌘ + / on Mac) — pulls up the full shortcut list any time you forget one.</li>
+      <li><code>/</code> — jumps your cursor straight into the search bar from anywhere.</li>
+      <li><code>n</code> — renames the selected file, no right-click needed.</li>
+      <li><code>s</code> — stars or unstars the selected file.</li>
+      <li><code>p</code> — opens a quick preview of the selected file.</li>
+      <li>Arrow keys — move between files without ever touching the mouse.</li>
+    </ul>
+    <p>Tap each case to reveal the shortcut:</p>
+    <div id="m6scenarios"></div>
+  </div>
+
+  <div class="mission" id="mission7">
+    <div class="mission-eyebrow">Module 7 · ~10 min</div>
+    <h2>🛡️ Safety Habits</h2>
+    <p>True or false?</p>
+    <div id="m7scenarios"></div>
+  </div>
+
+  <div class="mission" id="mission8">
+    <div class="mission-eyebrow">Final Review · ~5 min</div>
+    <h2>⭐ Clearance Granted</h2>
+    <p>Debrief complete. Here's your field summary before you claim your certificate.</p>
+    <div class="recap-grid">
+      <div class="recap-item"><div class="recap-emoji">🗂️</div><div class="recap-text">My Drive is yours; Shared with me is everyone else's, and it's free storage-wise.</div></div>
+      <div class="recap-item"><div class="recap-emoji">📤</div><div class="recap-text">Color-code folders, use Shift+Z for one file in two folders, and scan paper straight from your phone.</div></div>
+      <div class="recap-item"><div class="recap-emoji">🔍</div><div class="recap-text">type:, owner:, to:, and before:/after: turn search into a scalpel instead of scrolling forever.</div></div>
+      <div class="recap-item"><div class="recap-emoji">🔗</div><div class="recap-text">Match access level to the person, and avoid "Anyone with the link" for personal files.</div></div>
+      <div class="recap-item"><div class="recap-emoji">💾</div><div class="recap-text">Check Settings → Storage before assuming you need to pay for more space.</div></div>
+      <div class="recap-item"><div class="recap-emoji">⌨️</div><div class="recap-text">Ctrl+/, /, n, s, and p cover most of what you'll ever need from the keyboard.</div></div>
+      <div class="recap-item"><div class="recap-emoji">🛡️</div><div class="recap-text">Verify sign-in pages, and periodically review who has access to important files.</div></div>
+    </div>
+    <div class="cert" id="certificate">
+      <div class="cert-seal">OFFICIAL<br>SEAL</div>
+      <div class="cert-eyebrow">DRIVE OPS ACADEMY</div>
+      <div class="cert-name" id="certName">Field Agent</div>
+      <div class="cert-line">has completed all 7 modules of Google Drive Skills Training</div>
+      <div class="cert-badges">🗂️📤🔍🔗💾⌨️🛡️</div>
+      <div class="cert-date" id="certDate"></div>
+    </div>
+    <div class="hint" style="margin-top:14px;"><button class="nav-btn primary" onclick="window.print()">🖨 Print certificate</button></div>
+  </div>
+
+  <div class="nav-row">
+    <button class="nav-btn ghost" id="backBtn" onclick="changeMission(-1)">← Back</button>
+    <button class="nav-btn primary" id="nextBtn" onclick="changeMission(1)">Begin Module 1 →</button>
+  </div>
+  <div class="hint" id="gateHint"></div>
+  <div class="parent-note">Facilitator note: each module runs ~10 minutes. Natural break points fall between every module — no need to finish in one sitting.</div>
+</div>
+
+<script>
+  const missionIds = ['mission0','mission1','mission2','mission3','mission4','mission5','mission6','mission7','mission8'];
+  let current = 0;
+  const badgeEarned = [false,false,false,false,false,false,false];
+  const nextLabels = ['Begin Module 1 →','Module 2 →','Module 3 →','Module 4 →','Module 5 →','Module 6 →','Module 7 →','Final Review →','🎉 Finish!'];
+  const fileLines = [
+    'FILE 01/07 — Read the briefing, then complete the field exercise to advance.',
+    'FILE 01/07 — Finding Your Way Around. Sort each item correctly to proceed.',
+    'FILE 02/07 — Uploading & Organizing. Reveal the best move each time.',
+    'FILE 03/07 — Search Like a Pro. Reveal the right search each time.',
+    'FILE 04/07 — Sharing Without Oversharing. True or false, every time.',
+    'FILE 05/07 — Storage & Housekeeping. Reveal the fix each time.',
+    'FILE 06/07 — Speed Tricks & Shortcuts. Reveal the shortcut each time.',
+    'FILE 07/07 — Safety Habits. True or false, every time.',
+    'DEBRIEF — Review complete. Claim your certificate below.'
+  ];
+
+  function showMission(i){
+    missionIds.forEach((id,idx)=>document.getElementById(id).classList.toggle('active', idx===i));
+    document.getElementById('fileStrip').innerHTML = '<span>' + fileLines[i].replace(/^([A-Z ]+\d\d\/\d\d)/, '<b>$1</b>') + '</span>';
+    document.getElementById('backBtn').style.visibility = i===0 ? 'hidden' : 'visible';
+    document.getElementById('nextBtn').textContent = nextLabels[i];
+    updateGate();
+  }
+
+  function changeMission(dir){
+    const target = current + dir;
+    if(target < 0 || target >= missionIds.length) return;
+    if(dir === 1){
+      if(current===0){
+        let name = document.getElementById('agentName').value.trim();
+        document.getElementById('certName').textContent = name || "Field Agent";
+      }
+      if(!canAdvance(current)) return;
+      const badgeIdx = current - 1;
+      if(badgeIdx >= 0 && badgeIdx <= 6) earnBadge(badgeIdx);
+      if(current === 7){
+        const d = new Date();
+        document.getElementById('certDate').textContent = 'Certified ' + d.toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'});
+      }
+    }
+    current = target;
+    showMission(current);
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  function canAdvance(i){
+    if(i===1) return m1done;
+    if(i===2) return m2done;
+    if(i===3) return m3done;
+    if(i===4) return m4done;
+    if(i===5) return m5done;
+    if(i===6) return m6done;
+    if(i===7) return m7done;
+    return true;
+  }
+
+  function updateGate(){
+    const hint = document.getElementById('gateHint');
+    const nextBtn = document.getElementById('nextBtn');
+    let ok = canAdvance(current);
+    if(current===8){ nextBtn.style.display='none'; hint.textContent=''; return; }
+    nextBtn.style.display='inline-block';
+    nextBtn.disabled = !ok;
+    hint.textContent = ok ? '' : 'Complete the field exercise above to unlock the next module.';
+  }
+
+  function earnBadge(idx){
+    if(idx<0 || idx>6 || badgeEarned[idx]) return;
+    badgeEarned[idx] = true;
+    const slot = document.querySelector('.stamp-slot[data-badge="'+idx+'"]');
+    slot.classList.add('earned','pop');
+    setTimeout(()=>slot.classList.remove('pop'), 650);
+    const count = badgeEarned.filter(Boolean).length;
+    document.getElementById('stampCaption').textContent = count + ' / 7 clearances earned';
+  }
+
+  /* MODULE 1: SORT */
+  const m1data = [
+    {label:'A photo album you uploaded from your phone', bucket:'a'},
+    {label:'A budget spreadsheet your coworker sent you', bucket:'c'},
+    {label:'A Slides deck you built for your own project', bucket:'a'},
+    {label:"Your accountant's tax folder, shared each year", bucket:'c'},
+    {label:'A resume file you created and saved', bucket:'a'},
+    {label:"A form a friend is co-editing with you", bucket:'c'}
+  ];
+  let m1correct = 0, m1done = false;
+  const m1container = document.getElementById('m1items');
+  m1data.forEach((item)=>{
+    const chip = document.createElement('div');
+    chip.className = 'sort-item';
+    chip.textContent = item.label;
+    chip.addEventListener('click', ()=>{
+      if(/done-/.test(chip.className)) return;
+      const guess = confirm(item.label + '\n\nOK = Shared with Me\nCancel = My Drive');
+      const guessed = guess ? 'c' : 'a';
+      const fb = document.getElementById('m1feedback');
+      if(guessed === item.bucket){
+        chip.classList.add('done-'+item.bucket); m1correct++;
+        fb.textContent = '✅ Correct.'; fb.className = 'feedback show good';
+        if(m1correct >= m1data.length){ m1done = true; fb.textContent = '🗂️ All items sorted correctly.'; updateGate(); }
+      } else {
+        chip.classList.add('shake'); setTimeout(()=>chip.classList.remove('shake'), 400);
+        fb.textContent = '🤔 Not quite — who actually owns this file?'; fb.className = 'feedback show bad';
+      }
+    });
+    m1container.appendChild(chip);
+  });
+
+  /* MODULE 2: REVEAL */
+  const m2data = [
+    {text:'You want your Tax folder to stand out from your Photos folder.', answer:'Right-click the folder → Organize → Change color.'},
+    {text:'You present the same Slides deck every single week.', answer:'Right-click it → Add to Starred, so it always shows up in the Starred shortcut.'},
+    {text:'You just took ten photos of receipts on your phone.', answer:'Open the Drive app, tap the + button, and choose Scan — it saves straight to My Drive as a clean PDF.'},
+    {text:'A file needs to live in both "Taxes" and "2026" without two copies.', answer:'Select it and press Shift + Z to add it to a second folder — one real file, two locations.'}
+  ];
+  let m2count = 0, m2done = false;
+  buildRevealSet('m2scenarios', m2data, ()=>{ m2count++; if(m2count>=m2data.length){ m2done=true; updateGate(); } });
+
+  /* MODULE 3: SEARCH REVEAL */
+  const m3data = [
+    {text:'You want to see just the files you personally created, not the dozens shared with you.', answer:'Type owner:me in the search bar.'},
+    {text:"You need to double-check exactly what you've shared with your sister.", answer:'Type to:her-email@example.com to see everything you\'ve given her access to.'},
+    {text:"You're hunting for a spreadsheet, not the other files with a similar name.", answer:'Type type:spreadsheet to filter results down to just spreadsheets.'},
+    {text:"You remember the exact title was \u201cvacation budget.\u201d", answer:'Put it in quotes: "vacation budget" for an exact phrase match instead of loose keywords.'}
+  ];
+  let m3count = 0, m3done = false;
+  buildRevealSet('m3scenarios', m3data, ()=>{ m3count++; if(m3count>=m3data.length){ m3done=true; updateGate(); } });
+
+  /* MODULE 4: SHARING TRUE/FALSE */
+  const m4data = [
+    {text:'"Anyone with the link" means literally anyone on the internet who gets that link can open it.', answer:'safe', explain:'True — treat this setting like handing out a spare key. Use it only for things fine to share broadly.'},
+    {text:"Once you share a file as Editor, there's no way to downgrade or remove access later.", answer:'flag', explain:"False — reopen Share any time and change or remove someone's access."},
+    {text:'For anything personal, sharing with specific email addresses is safer than "Anyone with the link."', answer:'safe', explain:'True — named sharing means only people you actually chose can get in.'}
+  ];
+  let m4answered = 0, m4done = false;
+  buildScenarioSet('m4scenarios', m4data, 'True', 'False', ()=>{ m4answered++; if(m4answered >= m4data.length){ m4done = true; updateGate(); } });
+
+  /* MODULE 5: STORAGE REVEAL */
+  const m5data = [
+    {text:"Your Drive says it's almost full but you don't know why.", answer:'Go to Settings → Storage to see your biggest files sorted largest first.'},
+    {text:'You deleted a huge video file, but your storage number didn\'t drop.', answer:'Empty the Trash — deleted files still count against your quota until then.'},
+    {text:"You're about to pay for more storage.", answer:'Check your actual usage breakdown first — many people can free up enough space without paying anything.'}
+  ];
+  let m5count = 0, m5done = false;
+  buildRevealSet('m5scenarios', m5data, ()=>{ m5count++; if(m5count>=m5data.length){ m5done=true; updateGate(); } });
+
+  /* MODULE 6: SHORTCUTS REVEAL */
+  const m6data = [
+    {text:'You want to rename a file fast, no mouse.', answer:'Select it and press N — no right-click menu needed.'},
+    {text:'You forgot every shortcut on this list.', answer:'Press Ctrl + / (⌘ + / on Mac) any time to see the full shortcut list.'},
+    {text:"You want to peek inside a file without fully opening it.", answer:'Select it and press P for a quick preview.'}
+  ];
+  let m6count = 0, m6done = false;
+  buildRevealSet('m6scenarios', m6data, ()=>{ m6count++; if(m6count>=m6data.length){ m6done=true; updateGate(); } });
+
+  /* MODULE 7: SAFETY TRUE/FALSE */
+  const m7data = [
+    {text:'Only Google could ever send an email saying someone "shared a document with you."', answer:'flag', explain:'False — scammers fake these constantly. Check the sender address and hover the link before clicking.'},
+    {text:'Clicking a shared-document link should always land on a real Google sign-in page before you type a password.', answer:'flag', explain:'False — fake look-alike pages exist. Always confirm the address bar reads accounts.google.com before entering your password.'},
+    {text:"It's smart to periodically reopen Share on important files and remove people who no longer need access.", answer:'safe', explain:'True — access tends to pile up over time; a quick review now and then keeps it tidy and safe.'}
+  ];
+  let m7answered = 0, m7done = false;
+  buildScenarioSet('m7scenarios', m7data, 'True', 'False', ()=>{ m7answered++; if(m7answered >= m7data.length){ m7done = true; updateGate(); } });
+
+  /* shared builders */
+  function buildScenarioSet(containerId, data, leftLabel, rightLabel, onCorrect){
+    const leftKey='safe', rightKey='flag';
+    const container = document.getElementById(containerId);
+    data.forEach((item)=>{
+      const card = document.createElement('div');
+      card.className = 'scenario-card';
+      card.innerHTML = `<div class="scenario-text">${item.text}</div>
+        <div class="btn-row"><button class="choice-btn" data-c="${leftKey}">${leftLabel}</button><button class="choice-btn" data-c="${rightKey}">${rightLabel}</button></div>
+        <div class="feedback"></div>`;
+      const btnL = card.querySelector('[data-c="'+leftKey+'"]');
+      const btnR = card.querySelector('[data-c="'+rightKey+'"]');
+      const fb = card.querySelector('.feedback');
+      let locked = false;
+      function handle(choice, btn, otherBtn){
+        if(locked) return;
+        if(choice === item.answer){
+          locked = true; btn.classList.add('correct'); otherBtn.disabled = true;
+          fb.textContent = '✅ ' + item.explain; fb.className = 'feedback show good';
+          onCorrect();
+        } else {
+          btn.classList.add('wrong'); setTimeout(()=>btn.classList.remove('wrong'), 500);
+          fb.textContent = 'Not quite — reconsider.'; fb.className = 'feedback show bad';
+        }
+      }
+      btnL.addEventListener('click', ()=>handle(leftKey, btnL, btnR));
+      btnR.addEventListener('click', ()=>handle(rightKey, btnR, btnL));
+      container.appendChild(card);
+    });
+  }
+
+  function buildRevealSet(containerId, data, onReveal){
+    const container = document.getElementById(containerId);
+    data.forEach((item)=>{
+      const card = document.createElement('div');
+      card.className = 'scenario-card';
+      card.innerHTML = `<div class="scenario-text">${item.text}</div>
+        <div class="btn-row"><button class="choice-btn">Reveal</button></div>
+        <div class="reveal-box"></div>`;
+      const btn = card.querySelector('.choice-btn');
+      const box = card.querySelector('.reveal-box');
+      btn.addEventListener('click', ()=>{
+        if(btn.disabled) return;
+        btn.disabled = true; btn.classList.add('correct');
+        box.textContent = '✅ ' + item.answer; box.classList.add('show');
+        onReveal();
+      });
+      container.appendChild(card);
+    });
+  }
+
+  showMission(0);
+</script>
+</body>
+</html>
